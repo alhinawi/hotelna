@@ -5,5 +5,5 @@ pages_build_output_dir = "dist"
 [[d1_databases]]
 binding = "DB"
 database_name = "hotelna"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "fe8127e4-77d8-44ed-abe6-18de17af01ad"
 migrations_dir = "migrations"
