@@ -46,4 +46,7 @@ export const ar: Partial<Record<Key, string>> = {
   'bill.receipt': 'إيصال', 'bill.totalInvoiced': 'إجمالي الفواتير', 'bill.totalPaid': 'المحصّل', 'bill.totalOutstanding': 'المتبقي', 'bill.void': 'إلغاء الفاتورة', 'bill.newInvoice': 'فاتورة جديدة', 'bill.noPayments': 'مفيش مدفوعات لسه', 'bill.rates': 'النسب', 'bill.billTo': 'فاتورة إلى',
   'bill.thanks': 'شكراً لإقامتك معانا.', 'bill.itemType.room': 'غرفة', 'bill.itemType.service': 'خدمة', 'bill.itemType.food': 'أكل ومشروبات', 'bill.itemType.minibar': 'ميني بار', 'bill.itemType.laundry': 'مغسلة', 'bill.itemType.spa': 'سبا', 'bill.itemType.transport': 'مواصلات', 'bill.itemType.other': 'أخرى',
   'bill.outstandingOnly': 'المتبقي بس', 'bill.voidConfirm': 'تلغي الفاتورة دي؟ مش هتتحسب في الأرصدة.', 'bill.applyDiscount': 'مبلغ الخصم',
+  'hk.title': 'التنظيف والصيانة', 'hk.subtitle': 'جدول التنظيف وتكليف الموظفين وطلبات الصيانة.', 'hk.tasks': 'مهام التنظيف', 'hk.maintenance': 'الصيانة', 'hk.generate': 'إنشاء للغرف المتسخة', 'hk.generated': 'تم إنشاء {n} مهمة', 'hk.newTask': 'مهمة جديدة', 'hk.newMaint': 'طلب جديد',
+  'hk.assignee': 'المكلّف', 'hk.priority': 'الأولوية', 'hk.scheduled': 'الموعد', 'hk.start': 'ابدأ', 'hk.done': 'خلصت', 'hk.issue': 'المشكلة', 'hk.reported': 'تاريخ البلاغ', 'hk.resolve': 'تم الحل',
+  'hk.type.cleaning': 'تنظيف', 'hk.type.checkout_cleaning': 'تنظيف بعد المغادرة', 'hk.type.deep_cleaning': 'تنظيف عميق', 'hk.type.turndown': 'تجهيز المساء', 'hk.type.inspection': 'تفتيش', 'hk.type.laundry': 'مغسلة',
 }

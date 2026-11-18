@@ -45,5 +45,8 @@ export const en = {
   'bill.receipt': 'Receipt', 'bill.totalInvoiced': 'Invoiced', 'bill.totalPaid': 'Collected', 'bill.totalOutstanding': 'Outstanding', 'bill.void': 'Void invoice', 'bill.newInvoice': 'New invoice', 'bill.noPayments': 'No payments yet', 'bill.rates': 'Rates', 'bill.billTo': 'Bill to',
   'bill.thanks': 'Thank you for staying with us.', 'bill.itemType.room': 'Room', 'bill.itemType.service': 'Service', 'bill.itemType.food': 'Food and beverage', 'bill.itemType.minibar': 'Minibar', 'bill.itemType.laundry': 'Laundry', 'bill.itemType.spa': 'Spa', 'bill.itemType.transport': 'Transport', 'bill.itemType.other': 'Other',
   'bill.outstandingOnly': 'Outstanding only', 'bill.voidConfirm': 'Void this invoice? It will no longer count toward balances.', 'bill.applyDiscount': 'Discount amount',
+  'hk.title': 'Housekeeping', 'hk.subtitle': 'Cleaning schedule, staff assignments and maintenance requests.', 'hk.tasks': 'Cleaning tasks', 'hk.maintenance': 'Maintenance', 'hk.generate': 'Generate for dirty rooms', 'hk.generated': '{n} task(s) created', 'hk.newTask': 'New task', 'hk.newMaint': 'New request',
+  'hk.assignee': 'Assigned to', 'hk.priority': 'Priority', 'hk.scheduled': 'Scheduled', 'hk.start': 'Start', 'hk.done': 'Done', 'hk.issue': 'Issue', 'hk.reported': 'Reported', 'hk.resolve': 'Resolve',
+  'hk.type.cleaning': 'Cleaning', 'hk.type.checkout_cleaning': 'Checkout cleaning', 'hk.type.deep_cleaning': 'Deep cleaning', 'hk.type.turndown': 'Turndown', 'hk.type.inspection': 'Inspection', 'hk.type.laundry': 'Laundry',
 } as const
 export type Key = keyof typeof en
