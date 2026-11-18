@@ -8,7 +8,7 @@ const I18n = createContext<Ctx>(null as any)
 export const useI18n = () => useContext(I18n)
 
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>(() => (localStorage.getItem('hotelna_lang') as Lang) || 'en')
+  const [lang, setLangState] = useState<Lang>(() => (localStorage.getItem('hotelna_lang') as Lang) || (/^ar\b/i.test(navigator.language) || navigator.languages?.some((l) => /^ar(-|$)/i.test(l)) || /-EG$/i.test(navigator.language) ? 'ar' : 'en'))
   const [currency, setCurrency] = useState('EGP')
   const setLang = (l: Lang) => { localStorage.setItem('hotelna_lang', l); setLangState(l) }
   useEffect(() => { document.documentElement.lang = lang; document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr' }, [lang])
