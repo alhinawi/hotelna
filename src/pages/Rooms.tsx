@@ -150,7 +150,7 @@ function RoomForm({ room, cats, onClose, onSaved }: { room: Partial<Room>; cats:
         <Field label={t('rooms.category')} error={errs.category_id}>
           <Select value={v.category_id ?? ''} onChange={(e) => { const c = cats.find((x) => x.id === +e.target.value); set('category_id', +e.target.value); if (c && !room.id) { set('price', c.base_price); set('capacity', c.capacity); set('amenitiesText', c.amenities.join(', ')); set('image', c.image) } }}>{cats.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</Select>
         </Field>
-        <Field label={t('rooms.price')} error={errs.price}><Input type="number" min={0} step="0.01" value={v.price ?? ''} onChange={(e) => set('price', e.target.value)} error={!!errs.price} /></Field>
+        <Field label={t('rooms.price')} error={errs.price}><Input type="number" min={0} step="1" value={v.price ?? ''} onChange={(e) => set('price', e.target.value)} error={!!errs.price} /></Field>
         <Field label={t('rooms.capacity')} error={errs.capacity}><Input type="number" min={1} value={v.capacity ?? ''} onChange={(e) => set('capacity', e.target.value)} /></Field>
         <Field label={t('common.status')}><Select value={v.status} onChange={(e) => set('status', e.target.value)}>{['available', 'occupied', 'maintenance'].map((s) => <option key={s} value={s}>{t('status.' + s)}</option>)}</Select></Field>
         <Field label={t('rooms.housekeeping')}><Select value={v.housekeeping_status} onChange={(e) => set('housekeeping_status', e.target.value)}>{['clean', 'dirty', 'cleaning', 'inspected'].map((s) => <option key={s} value={s}>{t('status.' + s)}</option>)}</Select></Field>
