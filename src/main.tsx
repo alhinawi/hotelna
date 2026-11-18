@@ -15,6 +15,7 @@ import Guests from './pages/Guests'
 import Housekeeping from './pages/Housekeeping'
 import Billing from './pages/Billing'
 import Staff from './pages/Staff'
+import Settings from './pages/Settings'
 import { lazy } from 'react'
 const Reports = lazy(() => import('./pages/Reports'))
 
@@ -39,6 +40,7 @@ function Routed() {
           <Route path="billing" element={<Guard module="billing"><Billing /></Guard>} />
           <Route path="staff" element={<Guard module="staff"><Staff /></Guard>} />
           <Route path="reports" element={<Guard module="reports"><Reports /></Guard>} />
+          <Route path="settings" element={<Guard module="settings"><Settings /></Guard>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
