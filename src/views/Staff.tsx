@@ -38,7 +38,7 @@ function Employees({ w, onEdit }: { w: boolean; onEdit: (e: any) => void }) {
           { key: 'name', header: t('common.name'), sort: 'name', render: (r) => <span className="font-medium text-ink-900">{r.name}</span> },
           { key: 'dept', header: t('staff.department'), sort: 'department', render: (r) => t('dept.' + r.department) },
           { key: 'pos', header: t('staff.position'), sort: 'position', render: (r) => r.position, hideOnMobile: true },
-          { key: 'hire', header: t('staff.hired'), sort: 'hire_date', render: (r) => <span className="num">{date(r.hire_date)}</span>, hideOnMobile: true },
+          { key: 'hire', header: t('staff.hired'), sort: 'hire_date', render: (r) => <span className="tabular-nums">{date(r.hire_date)}</span>, hideOnMobile: true },
           { key: 'score', header: t('staff.performance'), sort: 'avg_score', render: (r) => r.avg_score ? <span className="num flex items-center gap-1"><Star className="size-3 fill-gold-500 text-gold-500" />{Number(r.avg_score).toFixed(1)}</span> : '—' },
           { key: 'status', header: t('common.status'), sort: 'status', render: (r) => <StatusBadge status={r.status} /> },
         ]} />
@@ -64,7 +64,7 @@ function Profile({ id, w, onClose, onEdit, money }: { id: number; w: boolean; on
               <div><dt className="text-xs text-ink-500">{t('staff.position')}</dt><dd className="font-medium">{e.position}</dd></div>
               <div><dt className="text-xs text-ink-500">{t('common.phone')}</dt><dd className="num font-medium">{e.phone || '—'}</dd></div>
               <div><dt className="text-xs text-ink-500">{t('common.email')}</dt><dd className="break-all font-medium">{e.email || '—'}</dd></div>
-              <div><dt className="text-xs text-ink-500">{t('staff.hired')}</dt><dd className="num font-medium">{date(e.hire_date)}</dd></div>
+              <div><dt className="text-xs text-ink-500">{t('staff.hired')}</dt><dd className="tabular-nums font-medium">{date(e.hire_date)}</dd></div>
               {w && <div><dt className="text-xs text-ink-500">{t('staff.salary')}</dt><dd className="num font-medium">{money(e.salary)}</dd></div>}
             </dl>
             <p className="font-semibold">{t('staff.shifts')}</p>

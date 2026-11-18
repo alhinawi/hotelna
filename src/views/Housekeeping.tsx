@@ -46,7 +46,7 @@ function Tasks({ w }: { w: boolean }) {
           { key: 'type', header: t('common.type'), render: (r) => t('hk.type.' + r.type) },
           { key: 'staff', header: t('hk.assignee'), render: (r) => r.staff_name ?? '—', hideOnMobile: true },
           { key: 'prio', header: t('hk.priority'), sort: 'priority', render: (r) => <StatusBadge status={r.priority} /> },
-          { key: 'date', header: t('hk.scheduled'), sort: 'scheduled_for', render: (r) => <span className="num">{date(r.scheduled_for)}</span>, hideOnMobile: true },
+          { key: 'date', header: t('hk.scheduled'), sort: 'scheduled_for', render: (r) => <span className="tabular-nums">{date(r.scheduled_for)}</span>, hideOnMobile: true },
           { key: 'status', header: t('common.status'), sort: 'status', render: (r) => <StatusBadge status={r.status} /> },
           { key: 'act', header: '', render: (r) => w && <span className="flex justify-end gap-1">
             {r.status === 'pending' && <Button size="sm" onClick={() => upd(r.id, 'in_progress')}><Play className="size-3.5" />{t('hk.start')}</Button>}
@@ -75,7 +75,7 @@ function Maint({ w }: { w: boolean }) {
           { key: 'room', header: t('res.room'), render: (r) => <b className="num">{r.room_number ?? '—'}</b> },
           { key: 'title', header: t('hk.issue'), render: (r) => <span className="flex items-center gap-1.5"><Wrench className="size-3.5 text-ink-400" />{r.title}</span> },
           { key: 'prio', header: t('hk.priority'), render: (r) => <StatusBadge status={r.priority} /> },
-          { key: 'date', header: t('hk.reported'), render: (r) => <span className="num">{date(r.created_at)}</span>, hideOnMobile: true },
+          { key: 'date', header: t('hk.reported'), render: (r) => <span className="tabular-nums">{date(r.created_at)}</span>, hideOnMobile: true },
           { key: 'status', header: t('common.status'), render: (r) => <StatusBadge status={r.status} /> },
           { key: 'act', header: '', render: (r) => w && <span className="flex justify-end gap-1">
             {r.status === 'open' && <Button size="sm" onClick={() => upd(r.id, 'in_progress')}>{t('hk.start')}</Button>}
