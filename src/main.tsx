@@ -15,6 +15,8 @@ import Guests from './pages/Guests'
 import Housekeeping from './pages/Housekeeping'
 import Billing from './pages/Billing'
 import Staff from './pages/Staff'
+import { lazy } from 'react'
+const Reports = lazy(() => import('./pages/Reports'))
 
 
 function Guard({ module, children }: { module: Module; children: React.ReactNode }) {
@@ -36,6 +38,7 @@ function Routed() {
           <Route path="housekeeping" element={<Guard module="housekeeping"><Housekeeping /></Guard>} />
           <Route path="billing" element={<Guard module="billing"><Billing /></Guard>} />
           <Route path="staff" element={<Guard module="staff"><Staff /></Guard>} />
+          <Route path="reports" element={<Guard module="reports"><Reports /></Guard>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
