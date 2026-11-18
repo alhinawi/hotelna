@@ -27,3 +27,12 @@ npx wrangler d1 migrations apply hotelna --remote
 npx wrangler pages secret put JWT_SECRET
 npm run deploy
 ```
+
+## Hotelna
+
+Hotel management system: dashboard, rooms, reservations (drag-and-drop calendar), guests, housekeeping, billing, staff, reports (PDF and Excel), settings. English and Arabic (RTL).
+
+- Stack: Next.js (static export), Tailwind, Hono API on Cloudflare Pages Functions, D1.
+- Build: `npm ci && npm run build` (output `out`). Deploy: `wrangler pages deploy out --project-name hotelna`.
+- Database: `wrangler d1 migrations apply hotelna --remote`, demo data with `node db/seed.mjs > db/seed.sql`. Set the `JWT_SECRET` Pages secret.
+- Demo login: admin@hotelna.example / Admin@123.
