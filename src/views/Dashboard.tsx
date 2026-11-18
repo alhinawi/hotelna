@@ -107,7 +107,7 @@ export default function Dashboard() {
             {d.recent.map((r: any) => (
               <li key={r.id} className="flex cursor-pointer items-center gap-3 px-5 py-3 hover:bg-gold-100/30" onClick={() => nav('/reservations?open=' + r.id)}>
                 <div className="flex size-9 items-center justify-center rounded-full bg-ink-100 text-sm font-semibold text-ink-600">{r.room_number}</div>
-                <div className="min-w-0 flex-1"><p className="flex items-center gap-1.5 truncate text-sm font-medium text-ink-900">{r.guest_name}{r.guest_vip ? <Star className="size-3 fill-gold-500 text-gold-500" /> : null}</p><p className="num text-xs text-ink-500">{date(r.check_in)} → {date(r.check_out)}</p></div>
+                <div className="min-w-0 flex-1"><p className="flex items-center gap-1.5 truncate text-sm font-medium text-ink-900">{r.guest_name}{r.guest_vip ? <Star className="size-3 fill-gold-500 text-gold-500" /> : null}</p><p className="tabular-nums text-xs text-ink-500">{date(r.check_in)} → {date(r.check_out)}</p></div>
                 <div className="text-end"><StatusBadge status={r.status} /><p className="num mt-1 text-xs text-ink-500">{m0(r.total)}</p></div>
               </li>
             ))}
