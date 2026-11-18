@@ -11,13 +11,13 @@ const CURRENCIES: [string, string][] = [['EGP', 'EGP'], ['USD', '$'], ['EUR', 'â
 export default function Settings() {
   const { t } = useI18n(); const { user, settings } = useAuth()
   const admin = user?.role === 'admin'
-  const [tab, setTab] = useState<'hotel' | 'pricing' | 'users' | 'account'>('hotel')
-  const tabs = [{ id: 'hotel' as const, label: t('set.hotel') }, { id: 'pricing' as const, label: t('set.pricing') }, ...(admin ? [{ id: 'users' as const, label: t('set.users') }] : []), { id: 'account' as const, label: t('set.account') }]
+  const [tab, setTab] = useState<'hotel' | 'pricing' | 'users' | 'demo' | 'account'>('hotel')
+  const tabs = [{ id: 'hotel' as const, label: t('set.hotel') }, { id: 'pricing' as const, label: t('set.pricing') }, ...(admin ? [{ id: 'users' as const, label: t('set.users') }, { id: 'demo' as const, label: t('set.demo') }] : []), { id: 'account' as const, label: t('set.account') }]
   return (
     <div>
       <PageHeader title={t('set.title')} subtitle={t('set.subtitle')} />
       <Tabs tabs={tabs} value={tab} onChange={setTab} />
-      {tab === 'hotel' || tab === 'pricing' ? (settings.currency ? <SettingsForm key={tab + settings.currency + settings.hotel_name} kind={tab} admin={!!admin} /> : <Loading />) : tab === 'users' ? <Users /> : <Account />}
+      {tab === 'hotel' || tab === 'pricing' ? (settings.currency ? <SettingsForm key={tab + settings.currency + settings.hotel_name} kind={tab} admin={!!admin} /> : <Loading />) : tab === 'users' ? <Users /> : tab === 'demo' ? <DemoMode /> : <Account />}
     </div>
   )
 }
@@ -104,6 +104,27 @@ function Account() {
         <Field label={t('set.newPassword')} error={errs.next}><Input type="password" value={v.next} onChange={(e) => setV({ ...v, next: e.target.value })} error={!!errs.next} /></Field>
         <Button variant="primary" loading={busy} onClick={save}>{t('set.changePassword')}</Button>
       </div>
+    </Card>
+  )
+}
+
+function DemoMode() {
+  const { t } = useI18n(); const toast = useToast(); const { reloadSettings } = useAuth()
+  const { data, reload } = useApi<any>('/demo'); const [busy, setBusy] = useState(false)
+  const go = async (on: boolean) => {
+    if (!on && !confirm(t('set.demoOffConfirm'))) return
+    setBusy(true)
+    try { await api(on ? '/demo/enable' : '/demo/disable', { body: {} }); toast(t('common.saved')); reload(); reloadSettings() } catch (e) { toast(errMsg(e), 'err') } finally { setBusy(false) }
+  }
+  if (!data) return <Loading />
+  return (
+    <Card className="max-w-2xl p-6">
+      <div className="flex items-center justify-between gap-4">
+        <div><p className="font-semibold">{t('set.demo')}</p><p className="mt-1 text-sm text-ink-500">{t('set.demoHint')}</p></div>
+        <button role="switch" aria-checked={data.enabled} disabled={busy} onClick={() => go(!data.enabled)} className={'relative h-7 w-12 shrink-0 rounded-full transition ' + (data.enabled ? 'bg-gold-500' : 'bg-ink-200') + (busy ? ' opacity-50' : '')}><span className={'absolute top-0.5 size-6 rounded-full bg-white shadow transition-all ' + (data.enabled ? 'start-[22px]' : 'start-0.5')} /></button>
+      </div>
+      {busy && <p className="mt-4 text-sm text-ink-500">{t('common.loading')}â€¦</p>}
+      {data.enabled && <p className="mt-4 rounded-lg bg-gold-100 px-3 py-2 text-sm text-gold-600">{t('set.demoOn', { g: data.counts.guests, r: data.counts.reservations, s: data.counts.staff })}</p>}
     </Card>
   )
 }

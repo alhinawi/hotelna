@@ -12,6 +12,7 @@ import { billing } from './billing'
 import { housekeeping } from './housekeeping'
 import { staff } from './staff'
 import { reports } from './reports'
+import { demo } from './demo'
 
 export const app = new Hono<AppEnv>().basePath('/api')
 
@@ -40,7 +41,7 @@ app.use('*', async (c, next) => {
   const MAP: Record<string, Module | 'any' | 'admin_only'> = {
     rooms: 'rooms', categories: 'rooms', reservations: 'reservations', calendar: 'reservations', guests: 'guests', housekeeping: 'housekeeping', maintenance: 'housekeeping',
     invoices: 'billing', staff: 'staff', shifts: 'staff', attendance: 'staff', reviews: 'staff', reports: 'reports', dashboard: 'dashboard', activity: 'dashboard',
-    settings: 'settings', users: 'admin_only', auth: 'any', lookup: 'any', changes: 'any',
+    settings: 'settings', users: 'admin_only', demo: 'admin_only', auth: 'any', lookup: 'any', changes: 'any',
   }
   const m = MAP[seg]
   if (!m) throw new HttpError(404, 'Not found')
@@ -55,6 +56,7 @@ app.use('*', async (c, next) => {
   await next()
 })
 app.route('/', admin)
+app.route('/', demo)
 app.route('/', rooms)
 app.route('/', guests)
 app.route('/', reservations)
