@@ -1,3 +1,4 @@
+import { tr, trAll } from './errors'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 export class ApiError extends Error {
@@ -13,11 +14,11 @@ export async function api<T = any>(path: string, opts: { method?: string; body?:
     method: opts.method ?? (opts.body !== undefined ? 'POST' : 'GET'),
     headers: { 'Content-Type': 'application/json', ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}) },
     body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
-  })
+  }).catch(() => { throw new ApiError(0, tr('Network error')) })
   const data: any = await res.json().catch(() => ({}))
   if (!res.ok) {
     if (res.status === 401 && !path.startsWith('/auth/login')) { setToken(null); bus.dispatchEvent(new Event('unauth')) }
-    throw new ApiError(res.status, data.error || 'Request failed', data.details)
+    throw new ApiError(res.status, tr(data.error || 'Request failed'), trAll(data.details))
   }
   return data as T
 }

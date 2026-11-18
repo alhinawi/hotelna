@@ -20,6 +20,8 @@ app.onError((err, c) => {
   if (err instanceof HttpError) return c.json({ error: err.message, details: err.details }, err.status as any)
   if (err instanceof SyntaxError) return c.json({ error: 'Invalid JSON body' }, 400)
   console.error(err)
+  // free-plan limits (D1 daily reads, CPU) surface as exceptions: tell the user the service is busy instead of a generic error
+  if (/D1|7500|quota|limit|exceeded|too many|overloaded|storage/i.test(String((err as Error)?.message))) return c.json({ error: 'Service is busy, try again in a little while' }, 503)
   return c.json({ error: 'Internal error' }, 500)
 })
 app.notFound((c) => c.json({ error: 'Not found' }, 404))
