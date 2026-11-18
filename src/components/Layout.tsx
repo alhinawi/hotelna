@@ -41,7 +41,7 @@ export function Layout() {
       if (document.hidden) return
       try { const r = await api<{ last: number }>('/changes'); if (!alive) return; if (last.current !== null && r.last !== last.current) bus.dispatchEvent(new Event('changed')); last.current = r.last } catch { /* ignore */ }
     }
-    tick(); const id = setInterval(tick, 5000)
+    tick(); const id = setInterval(() => { if (!document.hidden) tick() }, 30000)
     const vis = () => !document.hidden && tick()
     document.addEventListener('visibilitychange', vis)
     return () => { alive = false; clearInterval(id); document.removeEventListener('visibilitychange', vis) }
