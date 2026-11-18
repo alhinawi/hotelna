@@ -1,0 +1,38 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+@import '@fontsource/playfair-display/latin-600.css';
+@import '@fontsource/playfair-display/latin-700.css';
+@import '@fontsource/ibm-plex-sans-arabic/arabic-400.css';
+@import '@fontsource/ibm-plex-sans-arabic/arabic-500.css';
+@import '@fontsource/ibm-plex-sans-arabic/arabic-600.css';
+@import '@fontsource/ibm-plex-sans-arabic/arabic-700.css';
+
+@theme {
+  --font-sans: 'Inter Variable', 'IBM Plex Sans Arabic', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Playfair Display', 'IBM Plex Sans Arabic', Georgia, serif;
+  --color-ink-950: #08111e;
+  --color-ink-900: #0e1a2b;
+  --color-ink-800: #16263d;
+  --color-ink-700: #22364f;
+  --color-ink-600: #3a4f69;
+  --color-ink-500: #5b6d84;
+  --color-ink-400: #8493a6;
+  --color-ink-300: #b4bfcc;
+  --color-ink-200: #dde3ea;
+  --color-ink-100: #eef1f5;
+  --color-ink-50: #f6f8fa;
+  --color-gold-600: #9a7437;
+  --color-gold-500: #b8924f;
+  --color-gold-400: #cfae72;
+  --color-gold-200: #ecdcb8;
+  --color-gold-100: #f6eedb;
+  --color-ivory: #faf8f4;
+}
+:root[dir='rtl'] body { font-family: 'IBM Plex Sans Arabic', 'Inter Variable', sans-serif; }
+:root[dir='rtl'] .font-display { font-family: 'IBM Plex Sans Arabic', serif; font-weight: 700; }
+html, body, #root { height: 100%; }
+body { background: var(--color-ivory); color: var(--color-ink-900); font-feature-settings: 'tnum' 1; -webkit-font-smoothing: antialiased; }
+.num { font-variant-numeric: tabular-nums; direction: ltr; unicode-bidi: isolate; }
+@media (prefers-reduced-motion: reduce) { *, ::before, ::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+::-webkit-scrollbar { width: 8px; height: 8px } ::-webkit-scrollbar-thumb { background: var(--color-ink-200); border-radius: 8px }
+@media print { .no-print { display: none !important } body { background: #fff } }
