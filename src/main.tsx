@@ -14,6 +14,7 @@ import Reservations from './pages/Reservations'
 import Guests from './pages/Guests'
 import Housekeeping from './pages/Housekeeping'
 import Billing from './pages/Billing'
+import Staff from './pages/Staff'
 
 
 function Guard({ module, children }: { module: Module; children: React.ReactNode }) {
@@ -34,6 +35,7 @@ function Routed() {
           <Route path="guests" element={<Guard module="guests"><Guests /></Guard>} />
           <Route path="housekeeping" element={<Guard module="housekeeping"><Housekeeping /></Guard>} />
           <Route path="billing" element={<Guard module="billing"><Billing /></Guard>} />
+          <Route path="staff" element={<Guard module="staff"><Staff /></Guard>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>

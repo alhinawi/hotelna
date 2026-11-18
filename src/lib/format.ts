@@ -3,7 +3,13 @@ const loc = (l: Lang) => (l === 'ar' ? 'ar-EG-u-nu-latn' : 'en-GB')
 export const fmtNum = (n: number, d = 0) => new Intl.NumberFormat('en-US', { maximumFractionDigits: d, minimumFractionDigits: d }).format(n ?? 0)
 export const fmtMoney = (n: number, cur = 'EGP', _l?: Lang) => `${new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(n ?? 0)} ${cur}`
 export const fmtMoney0 = (n: number, cur = 'EGP') => `${new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(n ?? 0)} ${cur}`
-export const fmtDate = (d?: string | null, l: Lang = 'en') => (d ? new Intl.DateTimeFormat(loc(l), { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(new Date(d.slice(0, 10) + 'T00:00:00Z')) : '')
+export const fmtDate = (d?: string | null, l: Lang = 'en') => {
+  if (!d) return ''
+  const dt = new Date(d.slice(0, 10) + 'T00:00:00Z')
+  if (l !== 'ar') return new Intl.DateTimeFormat(loc(l), { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(dt)
+  const mo = new Intl.DateTimeFormat(loc(l), { month: 'long', timeZone: 'UTC' }).format(dt)
+  return `${String(dt.getUTCDate()).padStart(2, '0')} ${mo} ${dt.getUTCFullYear()}`
+}
 export const fmtShort = (d: string, l: Lang = 'en') => new Intl.DateTimeFormat(loc(l), { day: '2-digit', month: 'short', timeZone: 'UTC' }).format(new Date(d.slice(0, 10) + 'T00:00:00Z'))
 export const fmtWeekday = (d: string, l: Lang = 'en') => new Intl.DateTimeFormat(loc(l), { weekday: 'short', timeZone: 'UTC' }).format(new Date(d + 'T00:00:00Z'))
 export const fmtDateTime = (d?: string | null, l: Lang = 'en') => (d ? new Intl.DateTimeFormat(loc(l), { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Africa/Cairo' }).format(new Date(d.replace(' ', 'T') + 'Z')) : '')
