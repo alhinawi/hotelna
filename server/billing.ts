@@ -38,6 +38,7 @@ export async function createInvoiceFor(db: D1Database, reservationId: number | n
   return id
 }
 
+const SUMS = new Map<string, { exp: number; v: any }>()
 billing.get('/invoices', async (c) => {
   const q = c.req.query()
   const p = listParams(q, ['number', 'issued_at', 'guest_name', 'subtotal', 'paid'], 'issued_at')
@@ -48,12 +49,21 @@ billing.get('/invoices', async (c) => {
   if (q.from) { where.push('date(i.issued_at)>=?'); args.push(q.from) }
   if (q.to) { where.push('date(i.issued_at)<=?'); args.push(q.to) }
   const w = where.length ? ' WHERE ' + where.join(' AND ') : ''
+  const order = `ORDER BY ${p.sort === 'guest_name' ? 'g.name' : p.sort === 'subtotal' || p.sort === 'paid' ? p.sort : 'i.' + p.sort} ${q.dir === 'asc' ? 'ASC' : 'DESC'}, i.id DESC`
+  const sumsOf = (rows: any[]) => ({ total: round2(rows.reduce((a: number, r: any) => a + (r.state === 'void' ? 0 : r.total), 0)), paid: round2(rows.reduce((a: number, r: any) => a + r.paid, 0)), outstanding: round2(rows.reduce((a: number, r: any) => a + (r.state === 'void' ? 0 : Math.max(0, r.balance)), 0)) })
+  if (!q.state) {
+    // fast path: page in SQL (reads one page, not every invoice); totals are cached for a short time per filter
+    const key = w + JSON.stringify(args), hit = SUMS.get(key)
+    const total = await c.env.DB.prepare(`SELECT COUNT(*) n FROM invoices i JOIN guests g ON g.id=i.guest_id LEFT JOIN reservations r ON r.id=i.reservation_id${w}`).bind(...args).first<{ n: number }>()
+    const { results } = await c.env.DB.prepare(`${INV_SELECT}${w} ${order} LIMIT ? OFFSET ?`).bind(...args, p.pageSize, p.offset).all()
+    let sums = hit && hit.exp > Date.now() ? hit.v : null
+    if (!sums) { const all = await c.env.DB.prepare(`${INV_SELECT}${w}`).bind(...args).all(); sums = sumsOf(all.results.map(computeInvoice)); SUMS.set(key, { exp: Date.now() + 120000, v: sums }) }
+    return c.json({ data: results.map(computeInvoice), total: total!.n, page: p.page, pageSize: p.pageSize, sums })
+  }
   // state filter is computed, so filter after computing when requested
-  const { results } = await c.env.DB.prepare(`${INV_SELECT}${w} ORDER BY ${p.sort === 'guest_name' ? 'g.name' : 'i.' + p.sort} ${q.dir === 'asc' ? 'ASC' : 'DESC'}`).bind(...args).all()
-  let rows = results.map(computeInvoice)
-  if (q.state) rows = rows.filter((r: any) => (q.state === 'outstanding' ? r.balance > 0.004 && r.state !== 'void' : r.state === q.state))
-  const sums = { total: round2(rows.reduce((a: number, r: any) => a + (r.state === 'void' ? 0 : r.total), 0)), paid: round2(rows.reduce((a: number, r: any) => a + r.paid, 0)), outstanding: round2(rows.reduce((a: number, r: any) => a + (r.state === 'void' ? 0 : Math.max(0, r.balance)), 0)) }
-  return c.json({ data: rows.slice(p.offset, p.offset + p.pageSize), total: rows.length, page: p.page, pageSize: p.pageSize, sums })
+  const { results } = await c.env.DB.prepare(`${INV_SELECT}${w} ${order}`).bind(...args).all()
+  const rows = results.map(computeInvoice).filter((r: any) => (q.state === 'outstanding' ? r.balance > 0.004 && r.state !== 'void' : r.state === q.state))
+  return c.json({ data: rows.slice(p.offset, p.offset + p.pageSize), total: rows.length, page: p.page, pageSize: p.pageSize, sums: sumsOf(rows) })
 })
 billing.get('/invoices/:id', async (c) => {
   const id = +c.req.param('id')
