@@ -81,7 +81,7 @@ export default function Rooms() {
                 </div>
                 <div className="p-4">
                   <div className="flex items-center justify-between"><p className="num text-base font-semibold text-ink-900">{money(r.price)}<span className="text-xs font-normal text-ink-400"> / {t('common.night')}</span></p><span className="flex items-center gap-1 text-xs text-ink-500"><Users className="size-3.5" />{r.capacity}</span></div>
-                  {r.status === 'occupied' && r.current_guest ? <p className="mt-2 truncate text-xs text-ink-600">{r.current_guest} · {t('rooms.checkout')} <span className="num">{date(r.current_checkout)}</span></p> : <div className="mt-2 flex flex-wrap gap-1">{r.amenities.slice(0, 4).map((a) => <Badge key={a}>{a}</Badge>)}{r.amenities.length > 4 && <Badge>+{r.amenities.length - 4}</Badge>}</div>}
+                  {r.status === 'occupied' && r.current_guest ? <p className="mt-2 truncate text-xs text-ink-600">{r.current_guest} · {t('rooms.checkout')} <span className="tabular-nums">{date(r.current_checkout)}</span></p> : <div className="mt-2 flex flex-wrap gap-1">{r.amenities.slice(0, 4).map((a) => <Badge key={a}>{a}</Badge>)}{r.amenities.length > 4 && <Badge>+{r.amenities.length - 4}</Badge>}</div>}
                 </div>
               </button>
               {canWrite && <div className="flex justify-end gap-1 border-t border-ink-100 px-2 py-1.5"><IconButton onClick={() => setEdit(r)} aria-label={t('common.edit')}><Pencil className="size-4" /></IconButton><IconButton onClick={() => setDel(r)} aria-label={t('common.delete')}><Trash2 className="size-4" /></IconButton></div>}
@@ -179,7 +179,7 @@ function RoomDetail({ id, onClose, onEdit, canWrite }: { id: number; onClose: ()
             </dl>
             <div><p className="mb-1.5 text-xs text-ink-500">{t('rooms.amenities')}</p><div className="flex flex-wrap gap-1.5">{data.amenities.map((a: string) => <Badge key={a} tone="gold">{a}</Badge>)}</div></div>
             <div><p className="mb-1.5 text-xs text-ink-500">{t('rooms.upcoming')}</p>
-              {data.upcoming.length ? <ul className="space-y-1.5">{data.upcoming.map((u: any) => <li key={u.id} className="flex items-center justify-between rounded-lg bg-ink-50 px-3 py-2"><span className="truncate">{u.guest_name}</span><span className="num text-xs text-ink-500">{date(u.check_in)} → {date(u.check_out)}</span></li>)}</ul> : <p className="text-ink-400">{t('common.none')}</p>}
+              {data.upcoming.length ? <ul className="space-y-1.5">{data.upcoming.map((u: any) => <li key={u.id} className="flex items-center justify-between rounded-lg bg-ink-50 px-3 py-2"><span className="truncate">{u.guest_name}</span><span className="tabular-nums text-xs text-ink-500">{date(u.check_in)} → {date(u.check_out)}</span></li>)}</ul> : <p className="text-ink-400">{t('common.none')}</p>}
             </div>
           </div>
         </div>

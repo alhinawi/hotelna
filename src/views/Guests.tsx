@@ -55,7 +55,7 @@ export default function Guests() {
             { key: 'phone', header: t('common.phone'), render: (r) => <span className="num">{r.phone}</span>, hideOnMobile: true },
             { key: 'nat', header: t('guest.nationality'), sort: 'nationality', render: (r) => r.nationality, hideOnMobile: true },
             { key: 'stays', header: t('guest.stays'), sort: 'stays', render: (r) => <span className="num">{r.stays}</span> },
-            { key: 'last', header: t('guest.lastStay'), sort: 'last_stay', render: (r) => <span className="num">{r.last_stay ? date(r.last_stay) : '—'}</span>, hideOnMobile: true },
+            { key: 'last', header: t('guest.lastStay'), sort: 'last_stay', render: (r) => <span className="tabular-nums">{r.last_stay ? date(r.last_stay) : '—'}</span>, hideOnMobile: true },
             { key: 'spent', header: t('guest.spent'), sort: 'total_spent', render: (r) => <span className="num">{money(r.total_spent)}</span> },
           ]} />
           <Pagination page={f.page} pageSize={15} total={data.total} onPage={(p) => setF((x) => ({ ...x, page: p }))} />
@@ -81,14 +81,14 @@ function Profile({ id, onClose, onEdit, canWrite }: { id: number; onClose: () =>
               <div><dt className="text-xs text-ink-500">{t('guest.nationality')}</dt><dd className="font-medium">{g.nationality || '—'}</dd></div>
               <div><dt className="text-xs text-ink-500">{t('guest.idNumber')}</dt><dd className="num font-medium">{g.id_number || '—'}</dd></div>
               <div><dt className="text-xs text-ink-500">{t('guest.spent')}</dt><dd className="num font-semibold">{money(g.total_spent)}</dd></div>
-              <div><dt className="text-xs text-ink-500">{t('guest.since')}</dt><dd className="num font-medium">{date(g.created_at)}</dd></div>
+              <div><dt className="text-xs text-ink-500">{t('guest.since')}</dt><dd className="tabular-nums font-medium">{date(g.created_at)}</dd></div>
             </dl>
             {g.preferences && <p className="rounded-lg bg-gold-100 px-3 py-2 text-gold-600"><b>{t('guest.prefs')}:</b> {g.preferences}</p>}
             {g.id_document && <img src={g.id_document} alt="ID" className="max-h-40 rounded-lg border border-ink-100" />}
           </div>
           <div>
             <p className="mb-2 text-sm font-semibold">{t('guest.history')}</p>
-            {g.stays.length === 0 ? <p className="text-sm text-ink-500">{t('guest.noStays')}</p> : <ul className="max-h-72 divide-y divide-ink-100 overflow-auto rounded-xl border border-ink-100 text-sm">{g.stays.map((s: any) => <li key={s.id} className="flex items-center justify-between gap-2 px-3 py-2"><span><b className="num">{s.code}</b><br /><span className="num text-xs text-ink-500">{date(s.check_in)} → {date(s.check_out)} · {s.room_number}</span></span><span className="text-end"><StatusBadge status={s.status} /><br /><span className="num text-xs">{money(s.total)}</span></span></li>)}</ul>}
+            {g.stays.length === 0 ? <p className="text-sm text-ink-500">{t('guest.noStays')}</p> : <ul className="max-h-72 divide-y divide-ink-100 overflow-auto rounded-xl border border-ink-100 text-sm">{g.stays.map((s: any) => <li key={s.id} className="flex items-center justify-between gap-2 px-3 py-2"><span><b className="num">{s.code}</b><br /><span className="tabular-nums text-xs text-ink-500">{date(s.check_in)} → {date(s.check_out)} · {s.room_number}</span></span><span className="text-end"><StatusBadge status={s.status} /><br /><span className="num text-xs">{money(s.total)}</span></span></li>)}</ul>}
           </div>
         </div>
       )}

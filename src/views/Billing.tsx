@@ -34,7 +34,7 @@ export default function Billing() {
           <DataTable<any> rows={data.data} sort={f.sort} dir={f.dir as any} onSort={(s) => setF((x) => ({ ...x, sort: s, dir: x.sort === s && x.dir === 'asc' ? 'desc' : 'asc' }))} onRow={(r) => setOpen(r.id)} cols={[
             { key: 'number', header: t('bill.number'), sort: 'number', render: (r) => <b className="num">{r.number}</b> },
             { key: 'guest', header: t('res.guest'), sort: 'guest_name', render: (r) => r.guest_name },
-            { key: 'date', header: t('bill.issued'), sort: 'issued_at', render: (r) => <span className="num">{date(r.issued_at)}</span>, hideOnMobile: true },
+            { key: 'date', header: t('bill.issued'), sort: 'issued_at', render: (r) => <span className="tabular-nums">{date(r.issued_at)}</span>, hideOnMobile: true },
             { key: 'total', header: t('common.total'), render: (r) => <span className="num">{money(r.total)}</span> },
             { key: 'paid', header: t('bill.paid'), sort: 'paid', render: (r) => <span className="num">{money(r.paid)}</span>, hideOnMobile: true },
             { key: 'bal', header: t('bill.balance'), render: (r) => <span className={cx('num', r.balance > 0.004 && r.state !== 'void' && 'font-semibold text-rose-600')}>{money(r.balance)}</span> },

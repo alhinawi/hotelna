@@ -55,8 +55,8 @@ function ListView({ onOpen }: { onOpen: (id: number) => void }) {
             { key: 'code', header: t('res.code'), sort: 'code', render: (r) => <span className="num font-medium text-ink-900">{r.code}</span> },
             { key: 'guest', header: t('res.guest'), sort: 'guest_name', render: (r) => <span className="flex items-center gap-1.5">{r.guest_name}{r.guest_vip ? <Star className="size-3 fill-gold-500 text-gold-500" /> : null}</span> },
             { key: 'room', header: t('res.room'), sort: 'room_number', render: (r) => <span className="num">{r.room_number} <span className="text-ink-400">· {r.category_name}</span></span>, hideOnMobile: true },
-            { key: 'in', header: t('res.checkin'), sort: 'check_in', render: (r) => <span className="num">{date(r.check_in)}</span> },
-            { key: 'out', header: t('res.checkout'), sort: 'check_out', render: (r) => <span className="num">{date(r.check_out)}</span>, hideOnMobile: true },
+            { key: 'in', header: t('res.checkin'), sort: 'check_in', render: (r) => <span className="tabular-nums">{date(r.check_in)}</span> },
+            { key: 'out', header: t('res.checkout'), sort: 'check_out', render: (r) => <span className="tabular-nums">{date(r.check_out)}</span>, hideOnMobile: true },
             { key: 'total', header: t('common.total'), sort: 'total', render: (r) => <span className="num">{money(r.total)}</span>, hideOnMobile: true },
             { key: 'status', header: t('common.status'), sort: 'status', render: (r) => <StatusBadge status={r.status} /> },
           ]} />
@@ -204,12 +204,12 @@ function ReservationDetail({ id, onClose, onEdit, canWrite }: { id: number; onCl
             <dl className="grid grid-cols-2 gap-3">
               <div><dt className="text-xs text-ink-500">{t('res.room')}</dt><dd className="num font-semibold">{r.room_number} · {r.category_name}</dd></div>
               <div><dt className="text-xs text-ink-500">{t('res.source')}</dt><dd className="font-semibold">{t('source.' + r.source)}</dd></div>
-              <div><dt className="text-xs text-ink-500">{t('res.checkin')}</dt><dd className="num font-semibold">{date(r.check_in)}</dd></div>
-              <div><dt className="text-xs text-ink-500">{t('res.checkout')}</dt><dd className="num font-semibold">{date(r.check_out)}</dd></div>
+              <div><dt className="text-xs text-ink-500">{t('res.checkin')}</dt><dd className="tabular-nums font-semibold">{date(r.check_in)}</dd></div>
+              <div><dt className="text-xs text-ink-500">{t('res.checkout')}</dt><dd className="tabular-nums font-semibold">{date(r.check_out)}</dd></div>
               <div><dt className="text-xs text-ink-500">{t('res.nights')}</dt><dd className="num font-semibold">{r.nights}</dd></div>
               <div><dt className="text-xs text-ink-500">{t('common.guests')}</dt><dd className="num font-semibold">{r.adults} + {r.children}</dd></div>
-              {r.checked_in_at && <div><dt className="text-xs text-ink-500">{t('res.checkedIn')}</dt><dd className="num">{dt(r.checked_in_at)}</dd></div>}
-              {r.checked_out_at && <div><dt className="text-xs text-ink-500">{t('res.checkedOut')}</dt><dd className="num">{dt(r.checked_out_at)}</dd></div>}
+              {r.checked_in_at && <div><dt className="text-xs text-ink-500">{t('res.checkedIn')}</dt><dd className="tabular-nums">{dt(r.checked_in_at)}</dd></div>}
+              {r.checked_out_at && <div><dt className="text-xs text-ink-500">{t('res.checkedOut')}</dt><dd className="tabular-nums">{dt(r.checked_out_at)}</dd></div>}
             </dl>
             {r.cancel_reason && <p className="rounded-lg bg-rose-50 px-3 py-2 text-rose-700">{r.cancel_reason}</p>}
             {r.notes && <p className="rounded-lg bg-ink-50 px-3 py-2 text-ink-600">{r.notes}</p>}
