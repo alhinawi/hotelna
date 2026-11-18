@@ -4,11 +4,11 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "dev": "next dev",
+    "build": "next build",
     "db:migrate:local": "wrangler d1 migrations apply hotelna --local",
     "db:seed:local": "wrangler d1 execute hotelna --local --file=db/seed.sql",
-    "preview": "wrangler pages dev dist --d1 DB=fe8127e4-77d8-44ed-abe6-18de17af01ad --port 8788",
+    "preview": "wrangler pages dev out --d1 DB=fe8127e4-77d8-44ed-abe6-18de17af01ad --port 8788",
     "deploy": "npm run build && wrangler pages deploy dist"
   },
   "dependencies": {
@@ -22,6 +22,7 @@
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.9",
     "lucide-react": "^1.75.0",
+    "next": "^16.4.6",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-router-dom": "^7.18.5",
@@ -29,6 +30,7 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20261118.1",
+    "@tailwindcss/postcss": "^4.3.5",
     "@tailwindcss/vite": "^4.3.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",

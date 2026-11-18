@@ -1,8 +1,45 @@
 {
   "compilerOptions": {
-    "target": "ES2022", "lib": ["ES2022","DOM","DOM.Iterable"], "module": "ESNext", "moduleResolution": "bundler",
-    "jsx": "react-jsx", "strict": true, "skipLibCheck": true, "noEmit": true, "resolveJsonModule": true,
-    "types": ["@cloudflare/workers-types", "vite/client"], "paths": {"@/*": ["./src/*"]}
+    "target": "ES2022",
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "types": [
+      "@cloudflare/workers-types"
+    ],
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    },
+    "allowJs": true,
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "esModuleInterop": true,
+    "isolatedModules": true
   },
-  "include": ["src", "functions", "shared"]
+  "include": [
+    "next-env.d.ts",
+    "src",
+    "functions",
+    "shared",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
