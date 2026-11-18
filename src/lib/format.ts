@@ -1,7 +1,7 @@
 export type Lang = 'en' | 'ar'
 const loc = (l: Lang) => (l === 'ar' ? 'ar-EG-u-nu-latn' : 'en-GB')
 export const fmtNum = (n: number, d = 0) => new Intl.NumberFormat('en-US', { maximumFractionDigits: d, minimumFractionDigits: d }).format(n ?? 0)
-export const fmtMoney = (n: number, cur = 'EGP', _l?: Lang) => `${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n ?? 0)} ${cur}`
+export const fmtMoney = (n: number, cur = 'EGP', _l?: Lang) => `${new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(n ?? 0)} ${cur}`
 export const fmtMoney0 = (n: number, cur = 'EGP') => `${new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(n ?? 0)} ${cur}`
 export const fmtDate = (d?: string | null, l: Lang = 'en') => (d ? new Intl.DateTimeFormat(loc(l), { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(new Date(d.slice(0, 10) + 'T00:00:00Z')) : '')
 export const fmtShort = (d: string, l: Lang = 'en') => new Intl.DateTimeFormat(loc(l), { day: '2-digit', month: 'short', timeZone: 'UTC' }).format(new Date(d.slice(0, 10) + 'T00:00:00Z'))

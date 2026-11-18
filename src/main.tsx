@@ -10,6 +10,8 @@ import type { Module } from '../shared/perms'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Rooms from './pages/Rooms'
+import Reservations from './pages/Reservations'
+import Guests from './pages/Guests'
 
 
 function Guard({ module, children }: { module: Module; children: React.ReactNode }) {
@@ -26,6 +28,8 @@ function Routed() {
         <Route element={<Layout />}>
           <Route index element={<Dashboard />} />
           <Route path="rooms" element={<Guard module="rooms"><Rooms /></Guard>} />
+          <Route path="reservations" element={<Guard module="reservations"><Reservations /></Guard>} />
+          <Route path="guests" element={<Guard module="guests"><Guests /></Guard>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
