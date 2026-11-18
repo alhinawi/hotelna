@@ -12,10 +12,13 @@ const secret = (c: any) => c.env.JWT_SECRET || 'dev-only-secret-change-me-in-pro
 publicApp.post('/auth/login', async (c) => {
   const v = validate(await c.req.json(), { email: { t: 'email', req: true }, password: { t: 'str', req: true, max: 200 } })
   const u = await c.env.DB.prepare('SELECT * FROM users WHERE email=?').bind(v.email).first<any>()
-  const ok = u && u.active && (await verifyPassword(v.password, u.password_hash))
+  let ok = false
+  try { ok = !!(u && u.active && (await verifyPassword(v.password, u.password_hash))) } catch (e) { console.error('login: password check failed', (e as Error).name, (e as Error).message) }
   if (!ok) throw new HttpError(401, 'Wrong email or password')
   const token = await signToken({ id: u.id, name: u.name, email: u.email, role: u.role }, secret(c))
-  await log(c.env.DB, { id: u.id, name: u.name, email: u.email, role: u.role }, 'login', 'user', u.id, `${u.name} signed in`)
+  // audit write runs after the response so sign-in does not wait on it
+  const audit = log(c.env.DB, { id: u.id, name: u.name, email: u.email, role: u.role }, 'login', 'user', u.id, `${u.name} signed in`).catch(() => {})
+  try { c.executionCtx.waitUntil(audit) } catch { await audit }
   return c.json({ token, user: { id: u.id, name: u.name, email: u.email, role: u.role, avatar: u.avatar } })
 })
 
