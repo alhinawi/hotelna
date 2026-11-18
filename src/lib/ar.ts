@@ -16,7 +16,7 @@ export const ar: Partial<Record<Key, string>> = {
   'dash.title': 'لوحة التحكم', 'dash.welcome': 'يوم سعيد يا {name}', 'dash.subtitle': 'دي حالة الفندق النهارده.',
   'dash.totalRooms': 'إجمالي الغرف', 'dash.occupied': 'مشغولة', 'dash.vacant': 'فاضية', 'dash.maintenance': 'صيانة', 'dash.occupancy': 'نسبة الإشغال',
   'dash.checkinsToday': 'وصول النهارده', 'dash.checkoutsToday': 'مغادرة النهارده', 'dash.revenueToday': 'إيراد النهارده', 'dash.revenueMonth': 'إيراد الشهر', 'dash.outstanding': 'المبالغ المتبقية',
-  'dash.inHouse': 'نزلاء في الفندق', 'dash.arrivalsSoon': 'وصول خلال ٧ أيام', 'dash.revenue14': 'الإيراد آخر ١٤ يوم', 'dash.occTrend': 'اتجاه الإشغال', 'dash.bookingStatus': 'الحجوزات حسب الحالة', 'dash.bookingSource': 'الحجوزات حسب المصدر',
+  'dash.inHouse': 'نزلاء في الفندق', 'dash.arrivalsSoon': 'وصول خلال 7 أيام', 'dash.revenue14': 'الإيراد آخر 14 يوم', 'dash.occTrend': 'اتجاه الإشغال', 'dash.bookingStatus': 'الحجوزات حسب الحالة', 'dash.bookingSource': 'الحجوزات حسب المصدر',
   'dash.recent': 'آخر الحجوزات', 'dash.activity': 'آخر النشاطات', 'dash.arrivals': 'وصول النهارده', 'dash.departures': 'مغادرة النهارده', 'dash.noArrivals': 'مفيش وصول النهارده', 'dash.noDepartures': 'مفيش مغادرة النهارده', 'dash.done': 'تم', 'dash.dirty': 'غرف محتاجة تنضيف', 'dash.viewAll': 'عرض الكل',
   'status.available': 'متاحة', 'status.occupied': 'مشغولة', 'status.maintenance': 'صيانة', 'status.clean': 'نضيفة', 'status.dirty': 'مش نضيفة', 'status.cleaning': 'بتتنضف', 'status.inspected': 'اتفحصت',
   'status.confirmed': 'مؤكد', 'status.checked_in': 'وصل', 'status.checked_out': 'غادر', 'status.cancelled': 'ملغي', 'status.no_show': 'مجاش',
