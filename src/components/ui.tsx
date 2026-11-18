@@ -172,8 +172,23 @@ export const fieldErrors = (e: unknown): Record<string, string> => (e instanceof
 export type Col<T> = { key: string; header: ReactNode; sort?: string; render?: (r: T) => ReactNode; className?: string; hideOnMobile?: boolean }
 export function DataTable<T extends { id: number | string }>({ cols, rows, sort, dir, onSort, onRow, empty }: { cols: Col<T>[]; rows: T[]; sort?: string; dir?: 'asc' | 'desc'; onSort?: (s: string) => void; onRow?: (r: T) => void; empty?: ReactNode }) {
   if (!rows.length) return <>{empty ?? <EmptyState />}</>
+  const [first, ...rest] = cols
   return (
-    <div className="overflow-x-auto">
+    <>
+    <ul className="divide-y divide-ink-100 sm:hidden">
+      {rows.map((r) => (
+        <li key={r.id} onClick={onRow ? () => onRow(r) : undefined} className={cx('space-y-1.5 px-4 py-3 text-sm', onRow && 'cursor-pointer active:bg-gold-100/30')}>
+          <div className="font-medium text-ink-900">{first.render ? first.render(r) : (r as any)[first.key]}</div>
+          {rest.map((c) => (
+            <div key={c.key} className={cx('flex items-center justify-between gap-3', !c.header && 'justify-end pt-1')}>
+              {c.header ? <span className="text-xs text-ink-500">{c.header}</span> : null}
+              <span className="min-w-0 text-ink-700">{c.render ? c.render(r) : (r as any)[c.key]}</span>
+            </div>
+          ))}
+        </li>
+      ))}
+    </ul>
+    <div className="overflow-x-auto max-sm:hidden">
       <table className="w-full min-w-[640px] text-sm">
         <thead>
           <tr className="border-b border-ink-100 text-start text-xs uppercase tracking-wide text-ink-500">
@@ -197,6 +212,7 @@ export function DataTable<T extends { id: number | string }>({ cols, rows, sort,
         </tbody>
       </table>
     </div>
+    </>
   )
 }
 export function Pagination({ page, pageSize, total, onPage }: { page: number; pageSize: number; total: number; onPage: (p: number) => void }) {

@@ -69,7 +69,10 @@ function ListView({ onOpen }: { onOpen: (id: number) => void }) {
 
 function CalendarView({ onOpen, onNew, canWrite }: { onOpen: (id: number) => void; onNew: (room: number, date: string) => void; canWrite: boolean }) {
   const { t, lang, dir } = useI18n(); const toast = useToast()
-  const [from, setFrom] = useState(addDaysISO(todayISO(), -2)); const DAYS = 21
+  const [vw, setVw] = useState(typeof window === 'undefined' ? 1200 : window.innerWidth)
+  useEffect(() => { const f = () => setVw(window.innerWidth); window.addEventListener('resize', f); return () => window.removeEventListener('resize', f) }, [])
+  const mobile = vw < 640, DAYS = mobile ? 7 : 21, LW = mobile ? 64 : 120
+  const [from, setFrom] = useState(addDaysISO(todayISO(), -2))
   const to = addDaysISO(from, DAYS)
   const { data, error, loading, reload } = useApi<any>('/calendar' + qs({ from, to }))
   const [drag, setDrag] = useState<any | null>(null); const [over, setOver] = useState<string | null>(null)
@@ -84,24 +87,24 @@ function CalendarView({ onOpen, onNew, canWrite }: { onOpen: (id: number) => voi
   const Prev = dir === 'rtl' ? ChevronRight : ChevronLeft, Next = dir === 'rtl' ? ChevronLeft : ChevronRight
   if (loading && !data) return <Loading />
   if (error || !data) return <ErrorState error={error ?? new Error('')} retry={reload} />
-  const COL = 56
+  const COL = mobile ? Math.max(36, Math.floor((vw - 34 - LW) / DAYS)) : 56
   return (
     <Card>
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink-100 p-4">
-        <p className="text-xs text-ink-500">{t('res.dragHint')}</p>
-        <div className="flex items-center gap-1"><IconButton onClick={() => setFrom(addDaysISO(from, -7))} aria-label={t('res.prev')}><Prev className="size-4" /></IconButton><Button size="sm" onClick={() => setFrom(addDaysISO(todayISO(), -2))}>{t('res.today')}</Button><IconButton onClick={() => setFrom(addDaysISO(from, 7))} aria-label={t('res.next')}><Next className="size-4" /></IconButton></div>
+        <p className="text-xs text-ink-500">{mobile ? t('res.tapHint') : t('res.dragHint')}</p>
+        <div className="flex items-center gap-1"><IconButton onClick={() => setFrom(addDaysISO(from, mobile ? -DAYS : -7))} aria-label={t('res.prev')}><Prev className="size-4" /></IconButton><Button size="sm" onClick={() => setFrom(addDaysISO(todayISO(), -2))}>{t('res.today')}</Button><IconButton onClick={() => setFrom(addDaysISO(from, mobile ? DAYS : 7))} aria-label={t('res.next')}><Next className="size-4" /></IconButton></div>
       </div>
       <div className="overflow-x-auto" dir="ltr">
-        <div style={{ minWidth: 120 + COL * DAYS }}>
+        <div style={{ minWidth: LW + COL * DAYS }}>
           <div className="sticky top-0 z-10 flex border-b border-ink-100 bg-white">
-            <div className="sticky left-0 z-10 w-[120px] shrink-0 border-e border-ink-100 bg-white px-3 py-2 text-xs font-medium text-ink-500">{t('res.room')}</div>
+            <div className="sticky left-0 z-10 shrink-0 border-e border-ink-100 bg-white px-2 py-2 text-xs font-medium text-ink-500 sm:px-3" style={{ width: LW }}>{t('res.room')}</div>
             {days.map((d) => <div key={d} style={{ width: COL }} className={cx('shrink-0 border-e border-ink-100 py-1.5 text-center text-[11px]', d === today ? 'bg-gold-100 font-semibold text-gold-600' : [5, 6].includes(new Date(d + 'T00:00:00Z').getUTCDay()) ? 'bg-ink-50 text-ink-500' : 'text-ink-500')}><div>{fmtWeekday(d, lang)}</div><div className="num">{fmtShort(d, lang)}</div></div>)}
           </div>
           {data.rooms.map((rm: any) => {
             const bookings = data.reservations.filter((r: any) => r.room_id === rm.id)
             return (
               <div key={rm.id} className="relative flex border-b border-ink-100 last:border-0" style={{ height: 40 }}>
-                <div className="sticky left-0 z-10 flex w-[120px] shrink-0 items-center gap-2 border-e border-ink-100 bg-white px-3 text-xs"><b className="num text-ink-900">{rm.number}</b><span className="truncate text-ink-400">{rm.category_name}</span></div>
+                <div className="sticky left-0 z-10 flex shrink-0 items-center gap-2 border-e border-ink-100 bg-white px-2 text-xs sm:px-3" style={{ width: LW }}><b className="num text-ink-900">{rm.number}</b><span className="truncate text-ink-400 max-sm:hidden">{rm.category_name}</span></div>
                 {days.map((d) => {
                   const key = rm.id + d
                   return <div key={d} style={{ width: COL }} onDragOver={(e) => { if (drag) { e.preventDefault(); setOver(key) } }} onDragLeave={() => setOver(null)} onDrop={() => { if (drag) move(drag, rm.id, d); setDrag(null); setOver(null) }} onClick={() => onNew(rm.id, d)}
@@ -115,7 +118,7 @@ function CalendarView({ onOpen, onNew, canWrite }: { onOpen: (id: number) => voi
                     <div key={r.id} draggable={canWrite && r.status !== 'checked_out'} onDragStart={() => setDrag(r)} onDragEnd={() => { setDrag(null); setOver(null) }} onClick={(ev) => { ev.stopPropagation(); onOpen(r.id) }}
                       title={`${r.guest_name} · ${r.code}`}
                       className={cx('absolute top-1.5 flex h-7 cursor-pointer items-center gap-1 overflow-hidden px-2 text-[11px] font-medium text-white shadow-sm', BAR[r.status], cut ? 'rounded-e-md' : 'rounded-md', r.status === 'checked_out' && 'opacity-60')}
-                      style={{ left: 120 + s * COL + 2, width: (e - s) * COL - 4 }}>
+                      style={{ left: LW + s * COL + 2, width: (e - s) * COL - 4 }}>
                       {r.guest_vip ? <Star className="size-3 shrink-0 fill-white" /> : null}<span className="truncate">{r.guest_name}</span>
                     </div>
                   )
