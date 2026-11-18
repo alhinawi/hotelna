@@ -55,5 +55,6 @@ export const en = {
   'set.title': 'Settings', 'set.subtitle': 'Hotel details, pricing, users and your account.', 'set.hotel': 'Hotel', 'set.pricing': 'Pricing and tax', 'set.users': 'Users and roles', 'set.account': 'My account', 'set.hotelName': 'Hotel name', 'set.stars': 'Star rating', 'set.checkinTime': 'Check-in time', 'set.checkoutTime': 'Check-out time', 'set.language': 'Default language', 'set.applyLang': 'Use this language now',
   'set.currency': 'Currency', 'set.tax': 'Tax rate (%)', 'set.service': 'Service charge (%)', 'set.weekend': 'Weekend markup (%)', 'set.adminOnly': 'Only administrators can change these settings.', 'set.addUser': 'Add user', 'set.role': 'Role', 'set.disabled': 'Disabled', 'set.password': 'Password', 'set.newPassword': 'New password', 'set.currentPassword': 'Current password', 'set.changePassword': 'Change password',
   'set.demo': 'Demo mode', 'set.demoHint': 'Fills the system with sample guests, bookings, invoices, staff and tasks so it looks populated. Demo rows are flagged. Turning it off removes only those rows and never touches your real data.', 'set.demoOffConfirm': 'Remove all demo data? Your real data stays.', 'set.demoOn': 'Demo data is on: {g} guests, {r} reservations, {s} staff.',
+  'res.tapHint': 'Tap a booking for details. Tap an empty day to book.',
 } as const
 export type Key = keyof typeof en
