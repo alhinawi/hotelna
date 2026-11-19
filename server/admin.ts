@@ -2,7 +2,7 @@ import { newApp, log, getSettings } from './core'
 import { validate, HttpError, bad, todayStr, addDays, diffDays, round2 } from './util'
 import { hashPassword, verifyPassword, signToken } from './auth'
 import { ROLES, PERMS } from '../shared/perms'
-import { INV_SELECT, computeInvoice } from './billing'
+import { INV_SELECT, INV_CALC } from './billing'
 
 export const publicApp = newApp()
 export const admin = newApp()
@@ -123,9 +123,10 @@ admin.get('/dashboard', async (c) => {
     one(`SELECT COALESCE(SUM(CASE WHEN kind='payment' THEN amount ELSE -amount END),0) v FROM payments WHERE date(created_at)=?`, today),
     one(`SELECT COALESCE(SUM(CASE WHEN kind='payment' THEN amount ELSE -amount END),0) v FROM payments WHERE date(created_at)>=?`, monthStart),
     one(`SELECT COUNT(*) n FROM reservations WHERE status='checked_in'`),
-    db.prepare(`${INV_SELECT} WHERE i.status!='void'`).all(),
+    // outstanding balance aggregated in SQL (same math as computeInvoice): reads index rows, returns one row
+    one(`SELECT COALESCE(ROUND(SUM(MAX(0, d.balance)), 2), 0) v FROM (${INV_CALC(`${INV_SELECT} WHERE i.status!='void'`)}) d`),
   ])
-  const outstanding = round2((outst.results as any[]).map(computeInvoice).reduce((a, i) => a + Math.max(0, i.balance), 0))
+  const outstanding = round2(outst.v ?? 0)
   const from14 = addDays(today, -13)
   const { results: daily } = await db.prepare(`SELECT date(created_at) d, SUM(CASE WHEN kind='payment' THEN amount ELSE -amount END) v FROM payments WHERE date(created_at)>=? GROUP BY d`).bind(from14).all<any>()
   const dm = new Map(daily.map((r: any) => [r.d, r.v]))

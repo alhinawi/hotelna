@@ -1,6 +1,6 @@
 import { newApp } from './core'
 import { todayStr, addDays, diffDays, round2, bad } from './util'
-import { INV_SELECT, computeInvoice } from './billing'
+import { INV_SELECT, INV_CALC } from './billing'
 
 export const reports = newApp()
 
@@ -79,16 +79,21 @@ reports.get('/reports/guests', async (c) => {
 
 reports.get('/reports/financial', async (c) => {
   const { from, to } = range(c.req.query()); const db = c.env.DB
-  const { results: invs } = await db.prepare(`${INV_SELECT} WHERE i.status!='void' AND date(i.issued_at)>=? AND date(i.issued_at)<=?`).bind(from, to).all<any>()
-  const rows = invs.map(computeInvoice)
+  // invoice totals aggregated in SQL (same math as computeInvoice) instead of fetching every invoice in range
+  const agg = (await db.prepare(`SELECT COUNT(*) n,
+      ROUND(COALESCE(SUM(d.total),0),2) invoiced, ROUND(COALESCE(SUM(d.subtotal),0),2) subtotal,
+      ROUND(COALESCE(SUM(d.discount),0),2) discounts, ROUND(COALESCE(SUM(d.tax),0),2) tax, ROUND(COALESCE(SUM(d.service),0),2) service
+    FROM (${INV_CALC(`${INV_SELECT} WHERE i.status!='void' AND date(i.issued_at)>=? AND date(i.issued_at)<=?`)}) d`).bind(from, to).first<any>())!
   const { results: items } = await db.prepare(`SELECT it.type, SUM(it.quantity*it.unit_price) amount FROM invoice_items it JOIN invoices i ON i.id=it.invoice_id WHERE i.status!='void' AND date(i.issued_at)>=? AND date(i.issued_at)<=? GROUP BY it.type ORDER BY amount DESC`).bind(from, to).all<any>()
   const { results: pay } = await db.prepare(`SELECT kind, method, SUM(amount) amount FROM payments WHERE date(created_at)>=? AND date(created_at)<=? GROUP BY kind, method`).bind(from, to).all<any>()
-  const { results: outstanding } = await db.prepare(`${INV_SELECT} WHERE i.status!='void'`).all<any>()
-  const out = outstanding.map(computeInvoice).filter((i: any) => i.balance > 0.004).sort((a: any, b: any) => b.balance - a.balance)
-  const sum = (k: string) => round2(rows.reduce((a: number, r: any) => a + r[k], 0))
+  // top 20 outstanding invoices, with the grand total carried by a window function over the full filtered set
+  const { results: outstanding } = await db.prepare(`SELECT d.id, d.number, d.guest_name, d.total, d.paid, d.balance, d.room_number,
+      COALESCE(ROUND(SUM(d.balance) OVER (), 2), 0) outstanding_total
+    FROM (${INV_CALC(`${INV_SELECT} WHERE i.status!='void'`)}) d WHERE d.balance > 0.004 ORDER BY d.balance DESC, d.id DESC LIMIT 20`).bind().all<any>()
+  const outTotal = outstanding.length ? outstanding[0].outstanding_total : 0
   const refunds = round2(pay.filter((p: any) => p.kind === 'refund').reduce((a: number, p: any) => a + p.amount, 0))
   const collected = round2(pay.filter((p: any) => p.kind === 'payment').reduce((a: number, p: any) => a + p.amount, 0))
-  return c.json({ from, to, byType: items.map((i: any) => ({ type: i.type, amount: round2(i.amount) })), invoices: rows.length,
-    outstanding: out.slice(0, 20).map((i: any) => ({ id: i.id, number: i.number, guest_name: i.guest_name, total: i.total, paid: i.paid, balance: i.balance, room_number: i.room_number })),
-    totals: { invoiced: sum('total'), subtotal: sum('subtotal'), discounts: sum('discount'), tax: sum('tax'), service: sum('service'), collected, refunds, net_collected: round2(collected - refunds), outstanding_total: round2(out.reduce((a: number, i: any) => a + i.balance, 0)) } })
+  return c.json({ from, to, byType: items.map((i: any) => ({ type: i.type, amount: round2(i.amount) })), invoices: agg.n,
+    outstanding: outstanding.map(({ outstanding_total, ...i }: any) => i),
+    totals: { invoiced: agg.invoiced, subtotal: agg.subtotal, discounts: agg.discounts, tax: agg.tax, service: agg.service, collected, refunds, net_collected: round2(collected - refunds), outstanding_total: outTotal } })
 })
