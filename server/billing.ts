@@ -9,6 +9,29 @@ export const INV_SELECT = `SELECT i.*, g.name AS guest_name, r.code AS reservati
   COALESCE((SELECT SUM(CASE WHEN kind='payment' THEN amount ELSE -amount END) FROM payments WHERE invoice_id=i.id),0) AS paid
   FROM invoices i JOIN guests g ON g.id=i.guest_id LEFT JOIN reservations r ON r.id=i.reservation_id LEFT JOIN rooms rm ON rm.id=r.room_id`
 
+/**
+ * computeInvoice's math expressed in SQL over an INV_SELECT result, so lists can
+ * filter and aggregate totals in the database instead of fetching every invoice
+ * row. D1's free plan bills rows read; an unbounded INV_SELECT fetch was the
+ * most expensive query in the app (millions of rows read per call without indexes).
+ */
+export const INV_CALC = (base: string) => `WITH b AS MATERIALIZED (${base})
+SELECT t.*, ROUND(t.total - t.paid, 2) AS balance,
+  CASE WHEN t.status='void' THEN 'void'
+       WHEN t.total>0 AND ROUND(t.total - t.paid, 2) <= 0.004 THEN 'paid'
+       WHEN t.paid>0 THEN 'partial' ELSE 'unpaid' END AS state
+  FROM (SELECT s.*, ROUND(s.net + s.service + s.tax, 2) AS total
+    FROM (SELECT n.*, ROUND(n.net * n.service_rate / 100, 2) AS service,
+        ROUND((n.net + ROUND(n.net * n.service_rate / 100, 2)) * n.tax_rate / 100, 2) AS tax
+      FROM (SELECT b.*, MAX(0, b.subtotal - b.discount) AS net FROM b) n) s) t`
+
+/** the invoice list's sums (same math as computeInvoice), aggregated in SQL: reads rows via indexes, returns one row */
+export const INV_SUMS = (base: string, cond = '') => `SELECT COUNT(*) n,
+  ROUND(COALESCE(SUM(CASE WHEN d.state='void' THEN 0 ELSE d.total END),0),2) total,
+  ROUND(COALESCE(SUM(d.paid),0),2) paid,
+  ROUND(COALESCE(SUM(CASE WHEN d.state='void' THEN 0 ELSE MAX(0, d.balance) END),0),2) outstanding
+  FROM (${INV_CALC(base)}) d${cond ? ' WHERE ' + cond : ''}`
+
 export function computeInvoice(i: any) {
   const net = Math.max(0, i.subtotal - i.discount)
   const service = round2(net * i.service_rate / 100)
@@ -49,21 +72,44 @@ billing.get('/invoices', async (c) => {
   if (q.from) { where.push('date(i.issued_at)>=?'); args.push(q.from) }
   if (q.to) { where.push('date(i.issued_at)<=?'); args.push(q.to) }
   const w = where.length ? ' WHERE ' + where.join(' AND ') : ''
-  const order = `ORDER BY ${p.sort === 'guest_name' ? 'g.name' : p.sort === 'subtotal' || p.sort === 'paid' ? p.sort : 'i.' + p.sort} ${q.dir === 'asc' ? 'ASC' : 'DESC'}, i.id DESC`
-  const sumsOf = (rows: any[]) => ({ total: round2(rows.reduce((a: number, r: any) => a + (r.state === 'void' ? 0 : r.total), 0)), paid: round2(rows.reduce((a: number, r: any) => a + r.paid, 0)), outstanding: round2(rows.reduce((a: number, r: any) => a + (r.state === 'void' ? 0 : Math.max(0, r.balance)), 0)) })
+  const dir = q.dir === 'asc' ? 'ASC' : 'DESC'
+  const order = `ORDER BY ${p.sort === 'guest_name' ? 'g.name' : p.sort === 'subtotal' || p.sort === 'paid' ? p.sort : 'i.' + p.sort} ${dir}, i.id DESC`
+  const base = `${INV_SELECT}${w}`
   if (!q.state) {
-    // fast path: page in SQL (reads one page, not every invoice); totals are cached for a short time per filter
+    // fast path: page in SQL (reads one page, not every invoice); totals are one aggregate, cached for a short time per filter
     const key = w + JSON.stringify(args), hit = SUMS.get(key)
-    const total = await c.env.DB.prepare(`SELECT COUNT(*) n FROM invoices i JOIN guests g ON g.id=i.guest_id LEFT JOIN reservations r ON r.id=i.reservation_id${w}`).bind(...args).first<{ n: number }>()
-    const { results } = await c.env.DB.prepare(`${INV_SELECT}${w} ${order} LIMIT ? OFFSET ?`).bind(...args, p.pageSize, p.offset).all()
+    // the guests/reservations joins only matter for the text search; without it they cannot change the count
+    const countSql = q.q
+      ? `SELECT COUNT(*) n FROM invoices i JOIN guests g ON g.id=i.guest_id LEFT JOIN reservations r ON r.id=i.reservation_id${w}`
+      : `SELECT COUNT(*) n FROM invoices i${w}`
+    const total = await c.env.DB.prepare(countSql).bind(...args).first<{ n: number }>()
+    const { results } = await c.env.DB.prepare(`${base} ${order} LIMIT ? OFFSET ?`).bind(...args, p.pageSize, p.offset).all()
     let sums = hit && hit.exp > Date.now() ? hit.v : null
-    if (!sums) { const all = await c.env.DB.prepare(`${INV_SELECT}${w}`).bind(...args).all(); sums = sumsOf(all.results.map(computeInvoice)); SUMS.set(key, { exp: Date.now() + 120000, v: sums }) }
+    if (!sums) { const s = (await c.env.DB.prepare(INV_SUMS(base)).bind(...args).first<any>())!; sums = { total: s.total, paid: s.paid, outstanding: s.outstanding }; SUMS.set(key, { exp: Date.now() + 120000, v: sums }) }
     return c.json({ data: results.map(computeInvoice), total: total!.n, page: p.page, pageSize: p.pageSize, sums })
   }
-  // state filter is computed, so filter after computing when requested
-  const { results } = await c.env.DB.prepare(`${INV_SELECT}${w} ${order}`).bind(...args).all()
-  const rows = results.map(computeInvoice).filter((r: any) => (q.state === 'outstanding' ? r.balance > 0.004 && r.state !== 'void' : r.state === q.state))
-  return c.json({ data: rows.slice(p.offset, p.offset + p.pageSize), total: rows.length, page: p.page, pageSize: p.pageSize, sums: sumsOf(rows) })
+  // state is computed, so filter on the SQL-derived rows and page there instead of fetching and filtering every invoice.
+  // one pass: window aggregates carry the filtered count and sums alongside the page rows
+  const cond = q.state === 'outstanding' ? `d.balance > 0.004 AND d.state != 'void'` : `d.state = ?`
+  const sargs = q.state === 'outstanding' ? args : [...args, q.state]
+  const osort = p.sort === 'guest_name' ? 'd.guest_name' : 'd.' + p.sort
+  const { results } = await c.env.DB.prepare(`SELECT d.*,
+      COUNT(*) OVER () AS n,
+      ROUND(COALESCE(SUM(CASE WHEN d.state='void' THEN 0 ELSE d.total END) OVER (),0),2) AS sum_total,
+      ROUND(COALESCE(SUM(d.paid) OVER (),0),2) AS sum_paid,
+      ROUND(COALESCE(SUM(CASE WHEN d.state='void' THEN 0 ELSE MAX(0, d.balance) END) OVER (),0),2) AS sum_outstanding
+    FROM (${INV_CALC(base)}) d WHERE ${cond} ORDER BY ${osort} ${dir}, d.id DESC LIMIT ? OFFSET ?`).bind(...sargs, p.pageSize, p.offset).all<any>()
+  const data = results.map(({ n, sum_total, sum_paid, sum_outstanding, ...r }: any) => computeInvoice(r))
+  let total = 0, sums = { total: 0, paid: 0, outstanding: 0 }
+  if (results.length) {
+    const r0 = results[0]
+    total = r0.n; sums = { total: r0.sum_total, paid: r0.sum_paid, outstanding: r0.sum_outstanding }
+  } else if (p.offset > 0) {
+    // page past the end: window aggregates return nothing, so count and sum separately
+    const s = (await c.env.DB.prepare(INV_SUMS(base, cond)).bind(...sargs).first<any>())!
+    total = s.n; sums = { total: s.total, paid: s.paid, outstanding: s.outstanding }
+  }
+  return c.json({ data, total, page: p.page, pageSize: p.pageSize, sums })
 })
 billing.get('/invoices/:id', async (c) => {
   const id = +c.req.param('id')
