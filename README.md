@@ -1,13 +1,38 @@
 # Hotelna
 
-A complete hotel property management system: dashboard, rooms, reservations (with drag-and-drop calendar), guest CRM, housekeeping and maintenance, billing, staff, reports (PDF and Excel export) and settings. Arabic (Egyptian) and English, with RTL support.
+[Open the live application](https://hotelna.pages.dev/)
 
-**Stack:** React + TypeScript + Vite + Tailwind CSS, Hono on Cloudflare Pages Functions, Cloudflare D1 (SQLite). Free tier only.
+## See it in action
+
+Occupancy and revenue dashboard, room cards and reservation records.
+
+![Hotelna desktop dashboard](docs/media/desktop.webp)
+
+| Rooms | Reservations |
+| --- | --- |
+| ![Rooms view](docs/media/rooms.webp) | ![Reservations view](docs/media/reservations.webp) |
+
+### Short interface tour
+
+![Hotelna live interface tour](docs/media/demo.gif)
+
+A short GIF of three real navigation captures, not a continuous screen recording. Captured from the live site on November 19, 2026. The captures use the seeded fictional hotel data.
+
+<details>
+<summary>Mobile layout (390px)</summary>
+
+<img src="docs/media/mobile.webp" alt="Hotelna mobile dashboard" width="390" />
+
+</details>
+
+A bilingual hotel property management application: dashboard, rooms, reservations (with drag-and-drop calendar), guest CRM, housekeeping and maintenance, billing, staff, reports (PDF and Excel export) and settings. Arabic (Egyptian) and English, with RTL support.
+
+**Stack:** Next.js static export, React, TypeScript, Tailwind CSS, Hono on Cloudflare Pages Functions and Cloudflare D1 (SQLite). The application uses free-tier services, with provider quotas.
 
 ## Develop
 
 ```bash
-npm install
+npm ci
 npx wrangler d1 migrations apply hotelna --local
 node db/seed.mjs > db/seed.sql && npx wrangler d1 execute hotelna --local --file=db/seed.sql
 npm run build && npm run preview     # http://localhost:8788
@@ -25,14 +50,7 @@ Demo accounts (seeded): `admin@hotelna.example` / `Admin@123`, and manager, fron
 npx wrangler d1 create hotelna            # put the id in wrangler.toml
 npx wrangler d1 migrations apply hotelna --remote
 npx wrangler pages secret put JWT_SECRET
-npm run deploy
+npx wrangler pages deploy out --project-name hotelna
 ```
 
-## Hotelna
-
-Hotel management system: dashboard, rooms, reservations (drag-and-drop calendar), guests, housekeeping, billing, staff, reports (PDF and Excel), settings. English and Arabic (RTL).
-
-- Stack: Next.js (static export), Tailwind, Hono API on Cloudflare Pages Functions, D1.
-- Build: `npm ci && npm run build` (output `out`). Deploy: `wrangler pages deploy out --project-name hotelna`.
-- Database: `wrangler d1 migrations apply hotelna --remote`, demo data with `node db/seed.mjs > db/seed.sql`. Set the `JWT_SECRET` Pages secret.
-- Demo login: admin@hotelna.example / Admin@123.
+The Next.js export is `out/`. Use that directory for Pages deployment; the legacy `npm run deploy` script still names `dist/`. Production migrations and seed application are operator steps, not part of a README update. Back up existing data before applying migrations.
