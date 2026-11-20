@@ -2,7 +2,7 @@ import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import type { AppEnv } from './core'
 import { HttpError } from './util'
-import { verifyToken } from './auth'
+import { verifyToken, sessionSecret } from './auth'
 import { can, type Module } from '../shared/perms'
 import { publicApp, admin } from './admin'
 import { rooms } from './rooms'
@@ -34,9 +34,10 @@ app.route('/', publicApp)
 
 // auth + RBAC for everything below
 app.use('*', async (c, next) => {
+  const secret = sessionSecret(c.env)
   const h = c.req.header('Authorization') || ''
   const tok = h.startsWith('Bearer ') ? h.slice(7) : ''
-  const p = tok ? await verifyToken(tok, c.env.JWT_SECRET || 'dev-only-secret-change-me-in-production') : null
+  const p = tok ? await verifyToken(tok, secret) : null
   if (!p) throw new HttpError(401, 'Sign in required')
   c.set('user', { id: p.id, name: p.name, email: p.email, role: p.role })
   const seg = c.req.path.replace(/^\/api\//, '').split('/')[0]

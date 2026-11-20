@@ -1,3 +1,5 @@
+import { HttpError } from './util'
+
 const enc = new TextEncoder()
 const b64 = (b: ArrayBuffer | Uint8Array) => btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
 const unb64 = (s: string) => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0))
@@ -29,4 +31,13 @@ export async function verifyToken(token: string, secret: string): Promise<any | 
   if (!ok) return null
   const p = JSON.parse(new TextDecoder().decode(unb64(body)))
   return p.exp > Date.now() / 1000 ? p : null
+}
+
+// Missing server configuration must never turn into a known signing key.
+export function sessionSecret(env: { JWT_SECRET?: string }): string {
+  const value = env.JWT_SECRET;
+  if (!value?.trim() || value === 'dev-only-secret-change-me-in-production') {
+    throw new HttpError(503, 'Authentication is temporarily unavailable');
+  }
+  return value;
 }
